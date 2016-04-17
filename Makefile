@@ -48,10 +48,10 @@ clean:
 	@rm --preserve-root -rf $(DOCS_OUT)
 	@rm --preserve-root -rf node_modules
 
-lint:
+lint: node_modules
 	@$(BIN)/eslint $(SRC)
 
-test: lint build
+test: node_modules lint build
 	@$(BIN)/mocha --require must
 
 relase-major: check-commit build test
