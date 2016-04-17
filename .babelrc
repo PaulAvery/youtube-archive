@@ -2,10 +2,10 @@
 	"sourceMaps": "inline",
 	"presets": ["es2015"],
 	"plugins": [
-		"transform-async-to-generator",
-		"transform-runtime", {
+		["transform-async-to-generator"],
+		["transform-runtime", {
 			"polyfill": false,
 			"regenerator": true
-		}
+		}]
 	]
 }
