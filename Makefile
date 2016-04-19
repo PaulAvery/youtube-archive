@@ -1,68 +1,105 @@
+BIN = ./node_modules/.bin
 SRC = src
 LIB = lib
-BIN = ./node_modules/.bin
+TEST = test
 DOCS = docs
 DOCS_OUT = docs_out
 
+# Go three levels deep. Extend as neccessary
+SRCFILES = $(wildcard src/*.js) $(wildcard src/*/*.js) $(wildcard src/*/*/*.js)
+LIBFILES = $(patsubst $(SRC)/%.js,$(LIB)/%.js,$(SRCFILES))
+
+## Default Task
 default: build docs
 
 ## Utility
+# Installs npm dependencies
 node_modules: package.json
-	@npm install
+	@echo '### Installing packages'
+	@npm install --progress false
 
+# Checks if we have anything uncommited in our directory
 check-commit:
 	@git diff-index --quiet HEAD || (echo 'Uncommited changes!' && false)
 
 ## Build
-build: node_modules
-	@$(BIN)/babel $(SRC) --out-dir $(LIB)
+# Build each file via babel
+$(LIB)/%.js: $(SRC)/%.js node_modules
+	@mkdir -p ${@D}
+	@echo '$< => $@'
+	@$(BIN)/babel $< --out-file $@
 
+# Build all files
+build: $(LIBFILES)
+
+# Watch the source directory and rebuild as neccessary
 watch: node_modules
-	@$(BIN)/babel --watch src --out-dir $(LIB)
+	@echo '### Watching $(SRC)'
+	@while true; do \
+		inotifywait -qqr $(SRC) -e modify -e create -e delete -e move -e moved_to -e moved_from; \
+		make build -s; \
+	done
 
 ## Documentation
+# Make sure we have our target directory so we can later push to gh-pages branch
 $(DOCS_OUT)/.git:
+	@echo '### Fetching gh-pages branch from remote'
 	@rm --preserve-root -rf $(DOCS_OUT)
 	@git clone -b gh-pages `git remote get-url origin` $(DOCS_OUT)
 
+# Build documentation
 docs: node_modules $(DOCS_OUT)/.git
 	@rm --preserve-root -rf $(DOCS_OUT)/*
+	@echo '### Building docs'
 	@PAULAVERY_DOCS_IN='$(DOCS)' PAULAVERY_DOCS_OUT='$(DOCS_OUT)' $(BIN)/docs
 
+# Serve documentation and rebuild as neccessary
 serve-docs: docs
 	@./node_modules/.bin/static-server $(DOCS_OUT) > /dev/null &
-	@echo "Go to http://localhost:9080"
+	@echo 'Go to http://localhost:9080'
 	@while true; do \
 		inotifywait -qqr $(DOCS) package.json -e modify -e create -e delete -e move -e moved_to -e moved_from; \
 		make docs -s; \
 	done
 
+# Commit documentation to gh-pages branch if neccessary and then push it
 publish-docs: check-commit docs
 	@cd $(DOCS_OUT) && git add -A
-	@cd $(DOCS_OUT) && git diff-index --quiet HEAD || git commit -m 'Rebuild documentation '`cd ../ && git rev-parse HEAD`
+	@cd $(DOCS_OUT) && git diff-index --quiet HEAD || (echo '### Commiting documentation' && git commit -m 'Rebuild documentation '`cd ../ && git rev-parse HEAD`)
+	@echo '### Pushing documentation'
 	@cd $(DOCS_OUT) && git push
 
 ## Project Management
+# Remove all built files
 clean:
+	@echo '### Removing $(LIB), $(DOCS_OUT) and node_modules'
 	@rm --preserve-root -rf $(LIB)
 	@rm --preserve-root -rf $(DOCS_OUT)
 	@rm --preserve-root -rf node_modules
 
+# Run linter
 lint: node_modules
-	@$(BIN)/eslint $(SRC)
+	@$(BIN)/eslint $(SRC) $(TEST)
 
+# Run tests
 test: node_modules lint build
-	@$(BIN)/mocha --require must
+	@$(BIN)/ava
 
+# Create a major release after building and checking everything
 relase-major: check-commit build test
 	@npm version major
 
+# Create a minor release after building and checking everything
 relase-minor: check-commit build test
 	@npm version minor
 
+# Create a patch release after building and checking everything
 relase-patch: check-commit build test
 	@npm version patch
 
+# Publish to git remote as well as npm
 publish: check-commit build test publish-docs
+	@echo '### Pushing to git remote'
 	@git push --tags origin HEAD:master
+	@echo '### Publishing to npm'
 	@npm publish
