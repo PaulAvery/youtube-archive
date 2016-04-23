@@ -4,6 +4,15 @@ LIB = lib
 TEST = test
 DOCS = docs
 DOCS_OUT = docs_out
+DOCS_BRANCH = gh-pages
+LINE_COVERAGE = 100
+BRANCH_COVERAGE = 100
+FUNCTION_COVERAGE = 100
+REPORTER_COVERAGE = html
+
+# Load makefile config so we can override anything set above
+# CURDIR is used to prevent searching in include dirs
+-include $(CURDIR)/.makerc
 
 # Go three levels deep. Extend as neccessary
 SRCFILES = $(wildcard src/*.js) $(wildcard src/*/*.js) $(wildcard src/*/*/*.js)
@@ -43,9 +52,9 @@ watch: node_modules
 ## Documentation
 # Make sure we have our target directory so we can later push to gh-pages branch
 $(DOCS_OUT)/.git:
-	@echo '### Fetching gh-pages branch from remote'
+	@echo '### Fetching $(DOCS_BRANCH) branch from remote'
 	@rm --preserve-root -rf $(DOCS_OUT)
-	@git clone -b gh-pages `git remote get-url origin` $(DOCS_OUT)
+	@git clone -b $(DOCS_BRANCH) `git remote get-url origin` $(DOCS_OUT)
 
 # Build documentation
 docs: node_modules $(DOCS_OUT)/.git
@@ -72,18 +81,20 @@ publish-docs: check-commit docs
 ## Project Management
 # Remove all built files
 clean:
-	@echo '### Removing $(LIB), $(DOCS_OUT) and node_modules'
+	@echo '### Removing $(LIB), $(DOCS_OUT), node_modules, coverage and .nyc_output'
 	@rm --preserve-root -rf $(LIB)
 	@rm --preserve-root -rf $(DOCS_OUT)
 	@rm --preserve-root -rf node_modules
+	@rm --preserve-root -rf coverage
+	@rm --preserve-root -rf .nyc_output
 
 # Run linter
 lint: node_modules
 	@$(BIN)/eslint $(SRC) $(TEST)
 
-# Run tests
-test: node_modules lint build
-	@$(BIN)/ava
+# Run tests including coverage
+test: node_modules lint
+	@$(BIN)/nyc --check-coverage --lines $(LINE_COVERAGE) --functions $(FUNCTION_COVERAGE)  --branches $(BRANCH_COVERAGE) --reporter $(REPORTER_COVERAGE) -- $(BIN)/ava --require babel-register --timeout 10s
 
 # Create a major release after building and checking everything
 relase-major: check-commit build test

@@ -1,7 +1,10 @@
+/.nyc_output
 /.gitignore
 /.eslintrc
 /.babelrc
 /Makefile
+/coverage
+/.makerc
 /docs_out
 /docs
 /test
