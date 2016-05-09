@@ -9,6 +9,10 @@ LINE_COVERAGE = 100
 BRANCH_COVERAGE = 100
 FUNCTION_COVERAGE = 100
 REPORTER_COVERAGE = html
+RUN_TEST = true
+RUN_LINT = true
+RUN_DOCS = true
+RUN_BABEL = true
 
 # Load makefile config so we can override anything set above
 # CURDIR is used to prevent searching in include dirs
@@ -35,8 +39,12 @@ check-commit:
 # Build each file via babel
 $(LIB)/%.js: $(SRC)/%.js node_modules
 	@mkdir -p ${@D}
+ifeq ($(RUN_BABEL), true)
 	@echo '$< => $@'
 	@$(BIN)/babel $< --out-file $@
+else
+	@cp $< $@
+endif
 
 # Build all files
 build: $(LIBFILES)
@@ -52,15 +60,19 @@ watch: node_modules
 ## Documentation
 # Make sure we have our target directory so we can later push to gh-pages branch
 $(DOCS_OUT)/.git:
+ifeq ($(RUN_DOCS), true)
 	@echo '### Fetching $(DOCS_BRANCH) branch from remote'
 	@rm --preserve-root -rf $(DOCS_OUT)
 	@git clone -b $(DOCS_BRANCH) `git remote get-url origin` $(DOCS_OUT)
+endif
 
 # Build documentation
 docs: node_modules $(DOCS_OUT)/.git
+ifeq ($(RUN_DOCS), true)
 	@rm --preserve-root -rf $(DOCS_OUT)/*
 	@echo '### Building docs'
 	@PAULAVERY_DOCS_IN='$(DOCS)' PAULAVERY_DOCS_OUT='$(DOCS_OUT)' $(BIN)/docs
+endif
 
 # Serve documentation and rebuild as neccessary
 serve-docs: docs
@@ -73,10 +85,12 @@ serve-docs: docs
 
 # Commit documentation to gh-pages branch if neccessary and then push it
 publish-docs: check-commit docs
+ifeq ($(RUN_DOCS), true)
 	@cd $(DOCS_OUT) && git add -A
 	@cd $(DOCS_OUT) && git diff-index --quiet HEAD || (echo '### Commiting documentation' && git commit -m 'Rebuild documentation '`cd ../ && git rev-parse HEAD`)
 	@echo '### Pushing documentation'
 	@cd $(DOCS_OUT) && git push
+endif
 
 ## Project Management
 # Remove all built files
@@ -90,11 +104,15 @@ clean:
 
 # Run linter
 lint: node_modules
+ifeq ($(RUN_LINT), true)
 	@$(BIN)/eslint $(SRC) $(TEST)
+endif
 
 # Run tests including coverage
 test: node_modules lint
+ifeq ($(RUN_TEST), true)
 	@$(BIN)/nyc --check-coverage --lines $(LINE_COVERAGE) --functions $(FUNCTION_COVERAGE)  --branches $(BRANCH_COVERAGE) --reporter $(REPORTER_COVERAGE) -- $(BIN)/ava --require babel-register --timeout 10s
+endif
 
 # Create a major release after building and checking everything
 relase-major: check-commit build test
