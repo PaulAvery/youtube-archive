@@ -117,15 +117,15 @@ ifeq ($(RUN_TEST), true)
 endif
 
 # Create a major release after building and checking everything
-relase-major: check-commit build test
+release-major: check-commit build test
 	@npm version major
 
 # Create a minor release after building and checking everything
-relase-minor: check-commit build test
+release-minor: check-commit build test
 	@npm version minor
 
 # Create a patch release after building and checking everything
-relase-patch: check-commit build test
+release-patch: check-commit build test
 	@npm version patch
 
 # Publish to git remote as well as npm
