@@ -45,6 +45,8 @@ ifeq ($(RUN_BABEL), true)
 else
 	@cp $< $@
 endif
+	@chmod --reference=$< $@
+	@chown --reference=$< $@
 
 # Build all files
 build: $(LIBFILES)
