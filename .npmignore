@@ -5,7 +5,7 @@
 /Makefile
 /coverage
 /.makerc
-/docs_out
+/docs/out
 /docs
 /test
 /src
