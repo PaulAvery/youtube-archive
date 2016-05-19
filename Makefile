@@ -73,12 +73,12 @@ docs: node_modules $(DOCS_OUT)/.git
 ifeq ($(RUN_DOCS), true)
 	@rm --preserve-root -rf $(DOCS_OUT)/*
 	@echo '### Building docs'
-	@PAULAVERY_DOCS_IN='$(DOCS)' PAULAVERY_DOCS_OUT='$(DOCS_OUT)' $(BIN)/docs
+	@$(BIN)/docs -i '$(DOCS)' -o '$(DOCS_OUT)'
 endif
 
 # Serve documentation and rebuild as neccessary
 serve-docs: docs
-	@./node_modules/.bin/static-server $(DOCS_OUT) > /dev/null &
+	@$(BIN)/static-server $(DOCS_OUT) > /dev/null &
 	@echo 'Go to http://localhost:9080'
 	@while true; do \
 		inotifywait -qqr $(DOCS) package.json -e modify -e create -e delete -e move -e moved_to -e moved_from; \

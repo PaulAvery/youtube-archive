@@ -13,7 +13,7 @@
     "url": "https://github.com/PaulAvery/module-template.git"
   },
   "devDependencies": {
-    "@paulavery/docs": "^1.0.0",
+    "@paulavery/docs": "^2.0.0",
     "ava": "^0.14.0",
     "babel-cli": "^6.7.5",
     "babel-eslint": "^6.0.2",
