@@ -2,5 +2,4 @@
 /.nyc_output
 /coverage
 /docs_out
-/.makerc
 /lib
