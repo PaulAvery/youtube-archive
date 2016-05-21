@@ -25,6 +25,9 @@ LIBFILES = $(patsubst $(SRC)/%.js,$(LIB)/%.js,$(SRCFILES))
 ## Default Task
 default: build docs
 
+## Rebuild everything
+rebuild: | clean default
+
 ## Utility
 # Installs npm dependencies
 node_modules: package.json
@@ -117,19 +120,19 @@ ifeq ($(RUN_TEST), true)
 endif
 
 # Create a major release after building and checking everything
-release-major: check-commit build test
+release-major: | clean check-commit build test
 	@npm version major
 
 # Create a minor release after building and checking everything
-release-minor: check-commit build test
+release-minor: | clean check-commit build test
 	@npm version minor
 
 # Create a patch release after building and checking everything
-release-patch: check-commit build test
+release-patch: | clean check-commit build test
 	@npm version patch
 
 # Publish to git remote as well as npm
-publish: check-commit build test publish-docs
+publish: | clean check-commit build test publish-docs
 	@echo '### Pushing to git remote'
 	@git push --tags origin HEAD:master
 	@echo '### Publishing to npm'
