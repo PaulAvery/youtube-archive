@@ -96,7 +96,7 @@ ifeq ($(RUN_DOCS), true)
 	@cd $(DOCS_OUT) && git add -A
 	@cd $(DOCS_OUT) && git diff-index --quiet HEAD || (echo '### Commiting documentation' && git commit -m 'Rebuild documentation '`cd ../ && git rev-parse HEAD`)
 	@echo '### Pushing documentation'
-	@cd $(DOCS_OUT) && git push --set-upstream origin/$(DOCS_BRANCH)
+	@cd $(DOCS_OUT) && git push --set-upstream origin $(DOCS_BRANCH)
 endif
 
 ## Project Management
