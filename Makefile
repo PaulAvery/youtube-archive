@@ -70,7 +70,7 @@ ifeq ($(RUN_DOCS), true)
 	@rm --preserve-root -rf $(DOCS_OUT)
 	@mkdir $(DOCS_OUT)
 	@cp -r .git $(DOCS_OUT)/.git
-	@cd $(DOCS_OUT) && (git checkout $(DOCS_BRANCH) || git checkout -b $(DOCS_BRANCH) --track origin/$(DOCS_BRANCH) --orphan) && git pull
+	@cd $(DOCS_OUT) && git fetch --all && (git checkout $(DOCS_BRANCH) || git checkout --orphan $(DOCS_BRANCH))
 endif
 
 # Build documentation
@@ -96,7 +96,7 @@ ifeq ($(RUN_DOCS), true)
 	@cd $(DOCS_OUT) && git add -A
 	@cd $(DOCS_OUT) && git diff-index --quiet HEAD || (echo '### Commiting documentation' && git commit -m 'Rebuild documentation '`cd ../ && git rev-parse HEAD`)
 	@echo '### Pushing documentation'
-	@cd $(DOCS_OUT) && git push
+	@cd $(DOCS_OUT) && git push --set-upstream origin/$(DOCS_BRANCH)
 endif
 
 ## Project Management
