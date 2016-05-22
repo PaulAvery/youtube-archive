@@ -68,7 +68,9 @@ $(DOCS_OUT)/.git:
 ifeq ($(RUN_DOCS), true)
 	@echo '### Fetching $(DOCS_BRANCH) branch from remote'
 	@rm --preserve-root -rf $(DOCS_OUT)
-	@git clone -b $(DOCS_BRANCH) `git remote get-url origin` $(DOCS_OUT)
+	@mkdir $(DOCS_OUT)
+	@cp -r .git $(DOCS_OUT)/.git
+	@cd $(DOCS_OUT) && (git checkout $(DOCS_BRANCH) || git checkout -b $(DOCS_BRANCH) --track origin/$(DOCS_BRANCH) --orphan) && git pull
 endif
 
 # Build documentation
