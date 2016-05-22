@@ -138,4 +138,4 @@ publish: | clean check-commit build test publish-docs
 	@echo '### Pushing to git remote'
 	@git push --tags origin HEAD:master
 	@echo '### Publishing to npm'
-	@npm publish
+	@npm publish --access public
