@@ -70,7 +70,7 @@ ifeq ($(RUN_DOCS), true)
 	@rm --preserve-root -rf $(DOCS_OUT)
 	@mkdir $(DOCS_OUT)
 	@cp -r .git $(DOCS_OUT)/.git
-	@cd $(DOCS_OUT) && git fetch --all && (git checkout $(DOCS_BRANCH) || git checkout --orphan $(DOCS_BRANCH))
+	@cd $(DOCS_OUT) && git fetch --all && (git checkout $(DOCS_BRANCH) || ( git checkout origin/$(DOCS_BRANCH) && git checkout -b $(DOCS_BRANCH) ) || git checkout --orphan $(DOCS_BRANCH)) && (git pull || true)
 endif
 
 # Build documentation
