@@ -1,11 +1,16 @@
 {
-	"sourceMaps": "inline",
-	"presets": ["es2015"],
+	"sourceMaps": "both",
 	"plugins": [
+		["transform-es2015-block-scoped-functions"],
+		["transform-es2015-unicode-regex"],
+		["transform-es2015-parameters"],
+		["transform-es2015-destructuring"],
+		["transform-es2015-modules-commonjs"],
+		["transform-exponentiation-operator"],
 		["transform-async-to-generator"],
 		["transform-runtime", {
 			"polyfill": false,
-			"regenerator": true
+			"regenerator": false
 		}]
 	]
 }

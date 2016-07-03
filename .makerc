@@ -1,0 +1,2 @@
+RUN_TEST = false
+RUN_DOCS = false

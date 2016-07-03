@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Server Error</title>
+
+		<style>
+			body {
+				padding: 50px 80px;
+				font: 14px "Helvetica Neue", Helvetica, sans-serif;
+			}
+
+			h1, h2 {
+				margin: 0;
+				padding: 10px 0;
+			}
+
+			h1 {
+				font-size: 2em;
+			}
+
+			h2 {
+				font-size: 1.2em;
+				font-weight: 200;
+				color: #aaa;
+			}
+
+			pre {
+				font-size: .8em;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>500</h1>
+		<p>Looks like something broke!</p>
+		{{#debug}}
+			<h2>Message:</h2>
+			<pre><code>{{message}}</code></pre>
+
+			<h2>Stack:</h2>
+			<pre><code>{{stack}}</code></pre>
+		{{/debug}}
+	</body>
+</html>

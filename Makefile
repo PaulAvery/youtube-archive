@@ -19,8 +19,12 @@ RUN_BABEL = true
 -include $(CURDIR)/.makerc
 
 # Go three levels deep. Extend as neccessary
-SRCFILES = $(wildcard src/*.js) $(wildcard src/*/*.js) $(wildcard src/*/*/*.js)
+SRCFILES = $(wildcard src/*.js) $(wildcard src/*/*.js) $(wildcard src/*/*/*.js) $(wildcard src/*/*/*/*.js)  $(wildcard src/*/*/*/*/*.js)  $(wildcard src/*/*/*/*/*.js)
 LIBFILES = $(patsubst $(SRC)/%.js,$(LIB)/%.js,$(SRCFILES))
+
+# Define other files which should simply be copied over
+SRCFILESRAW = $(wildcard src/*.*[!js]) $(wildcard src/*/*.*[!js]) $(wildcard src/*/*/*.*[!js]) $(wildcard src/*/*/*/*.*[!js])
+LIBFILESRAW = $(patsubst $(SRC)/%,$(LIB)/%,$(SRCFILESRAW))
 
 ## Default Task
 default: build docs
@@ -42,17 +46,23 @@ check-commit:
 # Build each file via babel
 $(LIB)/%.js: $(SRC)/%.js node_modules
 	@mkdir -p ${@D}
-ifeq ($(RUN_BABEL), true)
 	@echo '$< => $@'
-	@$(BIN)/babel $< --out-file $@
+ifeq ($(RUN_BABEL), true)
+	@$(BIN)/babel $< --out-file $@ --source-file-name=$<
 else
 	@cp $< $@
 endif
 	@chmod --reference=$< $@
 	@chown --reference=$< $@
 
+# Copy other files
+$(LIB)/%: $(SRC)/%
+	@echo '$< => $@'
+	@mkdir -p ${@D}
+	@cp $< $@
+
 # Build all files
-build: $(LIBFILES)
+build: | $(LIBFILES) $(LIBFILESRAW)
 
 # Watch the source directory and rebuild as neccessary
 watch: node_modules
